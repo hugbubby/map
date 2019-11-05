@@ -9,6 +9,7 @@ import (
 
 	flag "github.com/spf13/pflag"
 )
+
 var quiet bool
 
 func clog(msg string) {
@@ -35,7 +36,7 @@ func main() {
 
 	flag.StringArrayVarP(&wordlists, "wordlist", "w", []string{}, "The wordlist to run commands from. Can be used multiple times to specify multiple wordlists.")
 	flag.StringVarP(&replacename, "replacename", "r", "GMAP", "The string to replace in your command with the array's members.")
-	flag.StringVarP(&delimiter, "delimiter", "d", " ", "The delimiter for your array.")
+	flag.StringVarP(&delimiter, "delimiter", "d", "\\s", "The delimiter for your array.")
 	flag.IntVarP(&threads, "threads", "t", 1, "The number of threads to use for cmd replacement; default 1.")
 	flag.BoolVarP(&quiet, "quiet", "q", false, "Whether or not to quiet output.")
 
@@ -60,7 +61,21 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(1)
 	}
-	array := strings.Split(wordlists[0], delimiter)
+    var array []string
+	if delimiter == "\\s" {
+        array_tmp := strings.Split(wordlists[0], " ")
+        array_tmp2 := make([]string, 0)
+        for _, k := range array_tmp {
+            array_tmp2 = append(array_tmp2, strings.Split(k, "\n")...)
+        }
+        array_tmp3 := make([]string, 0)
+        for _, k := range array_tmp2 {
+            array_tmp3 = append(array_tmp3, strings.Split(k, "\t")...)
+        }
+        array = array_tmp3
+	} else {
+		array = strings.Split(wordlists[0], delimiter)
+	}
 	cmd_s := flag.Arg(0)
 
 	//Small Queue.
